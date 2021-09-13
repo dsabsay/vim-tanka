@@ -17,9 +17,10 @@ A process that works is:
 
 * [x] Show current _context_ of plugin (i.e. Tanka environment `baseDir`).
 This should be a statusline thing or something.
-* [ ] Jump to file in import statement, using proper path searching rules.
+* [x] Jump to file in import statement, using proper path searching rules.
 See https://tanka.dev/libraries/import-paths
 * [ ] Search for word under cursor in all imported files (for current _context_)
+* [ ] Test changing Tanka envs while vim-tanka is already enabled (with a different env)
 * [ ] Document how to add the _context_ to an existing statusline setup (e.g. with arline, powerline, etc.)
 
 ==== Later versions
@@ -37,3 +38,5 @@ Parse error messages, extract line numbers, populate quickfix list.
 * Checkout the syntastic integration in `vim-jsonnet`: https://github.com/google/vim-jsonnet/pull/1
 * Jsonnet AST explorer thing: https://github.com/fkling/astexplorer/pull/505
 * https://github.com/returntocorp/semgrep
+* https://web.archive.org/web/20210516102739/https://vimways.org/2018/death-by-a-thousand-files/
+* https://teukka.tech/vimcandothat.html

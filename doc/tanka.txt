@@ -1,0 +1,117 @@
+*tanka.txt*
+
+Author: Daniel Sabsay <https://github.com/dsabsay>
+License: MIT
+
+================================================================================
+CONTENTS                                                        *tanka-contents*
+
+    1. Introduction .............................. |tanka-introduction|
+    2. Usage ..................................... |tanka-usage|
+    3. Commands .................................. |tanka-commands|
+    4. Common Problems ........................... |tanka-common-problems|
+    5. How It Works .............................. |tanka-how-it-works|
+    6. Related ................................... |tanka-related|
+
+================================================================================
+INTRODUCTION                                                *tanka-introduction*
+
+This plugin makes working with Tanka projects easier. Primarily, it aims to
+ease navigation of Jsonnet libraries. If you don't know what Tanka is, this
+plugin is probably not for you.
+
+https://tanka.dev/
+
+================================================================================
+USAGE                                                              *tanka-usage*
+
+You start by opening your entrypoint `main.jsonnet` file: >
+
+    :edit example/prom-grafana/environments/default/main.jsonnet
+<
+Then run: >
+
+    :TankaSetEnv
+<
+This command stores the Tanka environment in a global variable. From this
+point on, everything the plugin does is in relation to this environment.
+
+Move the cursor over the filename of a Jsonnet import statement and type |gf|
+to open the referenced file. This is fully aware of Tanka's search paths and
+precedence rules and works in all Jsonnet buffers. You can also use |:find|: >
+
+    :find 'prometheus-mixin/mixin-libsonnet'
+<
+To check which Tanka environment is currently active: >
+
+    :TankaEnv
+<
+And finally, to disable the plugin's features: >
+
+    :TankaOff
+<
+================================================================================
+COMMANDS                                                        *tanka-commands*
+
+:TankaEnv                                                            *:TankaEnv*
+    Prints the currently active Tanka environment.
+
+:TankaSetEnv                                                      *:TankaSetEnv*
+    Assuming this command is run while in a `main.jsonnet` buffer, that
+    environment will be set as the plugin's "active environment".
+
+:TankaOff                                                            *:TankaOff*
+    Turns off the plugin's features, restoring the local 'statusline' and
+    'path' settings of all Jsonnet buffers.
+    
+================================================================================
+COMMON PROBLEMS                                          *tanka-common-problems*
+
+If |:TankaSetEnv| fails, check to see that you can run `tk tool jpath <env>`
+successfully.
+
+================================================================================
+HOW IT WORKS                                                *tanka-how-it-works*
+
+Vim has an option, 'path', which determines the directories in which to search
+for include files. See `help 22.3`. Though this was probably originally
+designed only with C include files in mind, it can easily be re-purposed for
+other languages. Commands like |:find:| and |gf| and others reference 'path'.
+
+Tanka has its own import precedence rules that determine where a Jsonnet
+import statement resolves too (see https://tanka.dev/libraries/import-paths).
+These import paths are relative to a specific Tanka environment, which is why
+you must explicitly choose the environment.
+
+When the environment is chosen with |:TankaSetEnv|, the plugin gets the
+corresponding Jsonnet "path" by running: >
+
+    tk tool jpath <environment>
+<
+The output of that command is in the format that most Jsonnet tools expect,
+but isn't quite right for Vim's 'path'. For example, by default Jsonnet will
+resolve an import relative to the directory of the file making the import
+first, before searching any directories in the $JSONNET_PATH environment
+variable. Tanka adopts the same behavior, so ".," is prepended to 'path',
+which tells Vim to look relative to the directory of the current file as the
+first option. The plugin does some other reformatting to get the proper
+'path'.
+
+The plugin also displays the short name of the active Tanka environment in the
+statusline.
+
+The rest of the plugin is concerned with properly applying and un-applying
+these settings to all relevant buffers (i.e. all buffers with `jsonnet`
+filetype). This logic is tricky and may not be perfect. If you see weird
+errors, restarting Vim will fix any state issues.
+
+================================================================================
+RELATED                                                          *tanka-related*
+
+- Tanka: https://tanka.dev/
+- vim-jsonnet (basic syntax support): https://github.com/google/vim-jsonnet
+- vim-apathy (path-searching options for various file types) -
+  https://github.com/tpope/vim-apathy
+- https://teukka.tech/vimcandothat.html
+
+ vim:tw=78:et:ft=help:norl:

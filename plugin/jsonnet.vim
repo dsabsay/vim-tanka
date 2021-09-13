@@ -5,7 +5,6 @@ let s:vim_tanka_windows_original_statusline = {}
 let g:vim_tanka_env = ''
 let g:vim_tanka_env_fullpath = ''
 
-command! -nargs=0 TankaOn let g:vim_tanka_enabled = 1
 command! -nargs=0 TankaOff call s:TankaOff()
 command! -nargs=0 TankaEnv call s:PrintTankaEnv()
 command! -nargs=0 TankaSetEnv call s:SetTankaEnv()

@@ -1,0 +1,39 @@
+== Develop
+
+=== Tight feedback cycle
+
+My `.vimrc` adds this repository to `runtimepath`.
+A process that works is:
+
+. Edit `ftplugin/jsonnet.vim`
+. Re-open a Jsonnet file
+. Script is re-sourced
+
+== Design
+
+=== Feature goals
+
+==== First version
+
+* [x] Show current _context_ of plugin (i.e. Tanka environment `baseDir`).
+This should be a statusline thing or something.
+* [ ] Jump to file in import statement, using proper path searching rules.
+See https://tanka.dev/libraries/import-paths
+* [ ] Search for word under cursor in all imported files (for current _context_)
+* [ ] Document how to add the _context_ to an existing statusline setup (e.g. with arline, powerline, etc.)
+
+==== Later versions
+
+* [ ] Integration of tk/jsonnet errors into quickfix.
+Parse error messages, extract line numbers, populate quickfix list.
+* [ ] Auto-complete for function arguments (hover tooltip)
+
+== Bugs
+
+* When calling `:TankaSetEnv`, the cursor doesn't stay in the same window.
+
+== Notes
+
+* Checkout the syntastic integration in `vim-jsonnet`: https://github.com/google/vim-jsonnet/pull/1
+* Jsonnet AST explorer thing: https://github.com/fkling/astexplorer/pull/505
+* https://github.com/returntocorp/semgrep

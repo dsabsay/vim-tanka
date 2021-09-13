@@ -21,17 +21,38 @@ This should be a statusline thing or something.
 See https://tanka.dev/libraries/import-paths
 * [ ] Search for word under cursor in all imported files (for current _context_)
 * [ ] Test changing Tanka envs while vim-tanka is already enabled (with a different env)
-* [ ] Document how to add the _context_ to an existing statusline setup (e.g. with arline, powerline, etc.)
+* [ ] More testing with weird window states.
+Sometimes `:TankaSetEnv` leaves Vim in a weird state.
+I'm not sure `winrestview()` is actually working the way I think it should.
+* [ ] Write README.
 
 ==== Later versions
 
 * [ ] Integration of tk/jsonnet errors into quickfix.
 Parse error messages, extract line numbers, populate quickfix list.
 * [ ] Auto-complete for function arguments (hover tooltip)
+* [ ] Auto-complete for object fields.
+Sorta needs an lenient parser like tree-sitter.
+Or a hacky option is periodically running `tk eval` and caching the results.
+When `tk eval` fails, just use the latest cached result for completion.
+Updating cache could happen on a timer or on e.g. `BufWrite`.
+* [ ] Document how to add the _context_ to an existing statusline setup (e.g. with arline, powerline, etc.)
 
 == Bugs
 
-* When calling `:TankaSetEnv`, the cursor doesn't stay in the same window.
+* When calling `:TankaSetEnv`, the cursor doesn't always stay in the same window.
+** I had a faulty underestanding of `winsaveview()` and `winrestview()`:
+they only work on a single window, and doesn't even save which buffer was loaded.
+** The `bufdo` command is probably why the current buffer at the end isn't correct.
+** Instead of `winsaveview()` and `winresetview()` I think I just need this:
+*** Save current buffer number.
+*** Run `bufdo` command to set 'path'
+*** Restore original buffer
+*** Save current window number
+*** Run `windo` command to update 'statusline'
+*** Run `execute nr . 'wincmd w'` to restore focus to original window.
+* `:TankaSetEnv` and `:TankaOff` print a bunch of window names to the screen.
+Kind annoying.
 
 == Notes
 

@@ -12,16 +12,16 @@ See https://tanka.dev/libraries/import-paths
 * [x] More testing with weird window states.
 Sometimes `:TankaSetEnv` leaves Vim in a weird state.
 I'm not sure `winrestview()` is actually working the way I think it should.
-* [ ] Write README.
+* [x] Write README.
 
 ==== Later versions
 
+* [ ] Integration of tk/jsonnet errors into quickfix.
+Parse error messages, extract line numbers, populate quickfix list.
 * [ ] Search for word under cursor in all imported files (for current _context_)
 * [ ] Show docs from k8s-libsonnet (the docs are in the Jsonnet, probably via docsonnet) for some ID under cursor.
 ** Ideally, need symbol resolution with a full AST.
 ** Alternatively, a cruder approach would probably work OK, based on how most libraries I've seen use these function. We could just look for the `local deployment = $.core.v1.apps.deployment` line in the current file and then assume that will all come from the `_gen` folders in k8s-libsonnet. Prety hacky and unnaccurate though.
-* [ ] Integration of tk/jsonnet errors into quickfix.
-Parse error messages, extract line numbers, populate quickfix list.
 * [ ] Properly use autoload
 * [ ] Auto-complete for function arguments (hover tooltip)
 * [ ] Auto-complete for object fields.

@@ -1,13 +1,6 @@
 == Develop
 
-=== Tight feedback cycle
-
-My `.vimrc` adds this repository to `runtimepath`.
-A process that works is:
-
-. Edit `ftplugin/jsonnet.vim`
-. Re-open a Jsonnet file
-. Script is re-sourced
+TODO
 
 == Design
 
@@ -30,6 +23,7 @@ I'm not sure `winrestview()` is actually working the way I think it should.
 
 * [ ] Integration of tk/jsonnet errors into quickfix.
 Parse error messages, extract line numbers, populate quickfix list.
+* [ ] Properly use autoload
 * [ ] Auto-complete for function arguments (hover tooltip)
 * [ ] Auto-complete for object fields.
 Sorta needs an lenient parser like tree-sitter.
@@ -40,7 +34,7 @@ Updating cache could happen on a timer or on e.g. `BufWrite`.
 
 == Bugs
 
-* When calling `:TankaSetEnv`, the cursor doesn't always stay in the same window.
+* [FIXED] When calling `:TankaSetEnv`, the cursor doesn't always stay in the same window.
 ** I had a faulty underestanding of `winsaveview()` and `winrestview()`:
 they only work on a single window, and doesn't even save which buffer was loaded.
 ** The `bufdo` command is probably why the current buffer at the end isn't correct.
@@ -51,8 +45,11 @@ they only work on a single window, and doesn't even save which buffer was loaded
 *** Save current window number
 *** Run `windo` command to update 'statusline'
 *** Run `execute nr . 'wincmd w'` to restore focus to original window.
-* `:TankaSetEnv` and `:TankaOff` print a bunch of window names to the screen.
+* [FIXED] `:TankaSetEnv` and `:TankaOff` print a bunch of window names to the screen.
 Kind annoying.
+* [FIXED] `:TankaSetEnv` with terminal window open shows ugly error message.
+* [FIXED] `:TankaSetEnv` with a hidden terminal buffer shows ugly error and ends leaving it open.
+* After running `:TankaOff`, opening a previously open buffer still shows a tanka statusline.
 
 == Notes
 

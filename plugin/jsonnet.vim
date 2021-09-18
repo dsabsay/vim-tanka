@@ -1,5 +1,4 @@
 let g:vim_tanka_enabled = 0
-let s:vim_tanka_windows_original_statusline = {}
 
 " These variables must be changed simultaneously
 let g:vim_tanka_env = ''
@@ -8,10 +7,6 @@ let g:vim_tanka_env_fullpath = ''
 command! -nargs=0 TankaOff call s:TankaOff()
 command! -nargs=0 TankaEnv call s:PrintTankaEnv()
 command! -nargs=0 TankaSetEnv call s:SetTankaEnv()
-
-augroup vim_tanka_group
-    autocmd!
-augroup END
 
 function! s:PrintTankaEnv()
     if g:vim_tanka_enabled == 0
@@ -25,32 +20,85 @@ endfunction
 
 function! s:TankaOff()
     let g:vim_tanka_enabled = 0
-    call s:RestoreStatuslines()
+
+    " Reset statuslines
+    for win in getwininfo()
+        if getbufvar(win.bufnr, '&filetype') == "jsonnet"
+            call setwinvar(win.winnr, '&statusline', '')
+        endif
+    endfor
+    let curBufNr = bufnr('')
+    for buf in getbufinfo()
+        if getbufvar(buf.bufnr, '&filetype') == "jsonnet"
+            " echom 'clearing statusline for buf: ' . buf.bufnr
+            execute 'buffer ' . buf.bufnr
+            execute 'setlocal statusline='
+            " call setbufvar(buf.bufnr, '&statusline', '')
+        endif
+    endfor
+    execute 'buffer ' . curBufNr
 
     " Reset path value (will use global value)
     " path was changed to a buffer-local value. We don't restore
     " any previous buffer-local path because it's unlikely anyone
     " does that. If they did, it would probably conflict with this
     " plugin anyway.
-    let view = winsaveview()
-    bufdo call s:VimTankaResetPath()
-    call winrestview(view)
+    for buf in getbufinfo()
+        if getbufvar(buf.bufnr, '&filetype') == "jsonnet"
+            call setbufvar(buf.bufnr, '&path', '')
+        endif
+    endfor
+
+    " augroup vim_tanka_group
+    "     autocmd!
+    " augroup END
+endfunction
+
+function! s:ResetStatusline()
+    if &filetype == "jsonnet"
+        setlocal statusline=
+    endif
 endfunction
 
 function! s:TankaOn()
-    call s:TankaOff()
     let g:vim_tanka_enabled = 1
-    let view = winsaveview()
-    windo call VimTankaShowStatusline()
-    bufdo call VimTankaSetPath()
-    call winrestview(view)
+
+    " Show statuslines on all Jsonnet windows
+    let curWinNr = winnr()
+    for win in getwininfo()
+        if getbufvar(win.bufnr, '&filetype') == "jsonnet"
+            execute win.winnr . 'wincmd w'
+            call VimTankaShowStatusline()
+        endif
+    endfor
+    execute curWinNr . 'wincmd w'
+
+    " Try to get Jpath from tk
+    try
+        let p = s:VimTankaGetPath()
+    catch 'error'
+        echoerr 'Unable to get jpath from Tanka!'
+        return
+    endtry
+
+    " Set file search 'path' for all jsonnet buffers
+    for buf in getbufinfo()
+        if getbufvar(buf.bufnr, '&filetype') == "jsonnet"
+            call setbufvar(buf.bufnr, '&path', p)
+        endif
+    endfor
+    
+    " augroup vim_tanka_group
+    "     autocmd!
+    "     autocmd BufLeave *.jsonnet,*.libsonnet call s:ResetStatusline()
+    " augroup END
 endfunction
 
 function! s:SetTankaEnv()
     let l:fullpath = expand('%:p')
     let spec_path = expand('%:p:h') . '/spec.json'
     if filereadable(spec_path) == v:false
-        echo 'No spec.json found at' expand('%:p:h')
+        echoerr 'No spec.json found at' expand('%:p:h')
         return
     endif
 
@@ -75,6 +123,7 @@ function! s:SetTankaEnv()
     endtry
 
     " Set these vars at the same time to prevent inconsistency
+    call s:TankaOff()
     let g:vim_tanka_env = name
     let g:vim_tanka_env_fullpath = fullpath
     call s:TankaOn()
@@ -82,12 +131,7 @@ function! s:SetTankaEnv()
 endfunction
 
 function! VimTankaShowStatusline()
-    if &filetype == 'jsonnet'
-        if has_key(s:vim_tanka_windows_original_statusline, winnr()) == v:false
-            let s:vim_tanka_windows_original_statusline[winnr()] = &statusline
-        endif
-        execute 'setlocal statusline=%<%f\ [' . g:vim_tanka_env . ']\ %*%h%m%r%=%-14.(%l,%c%V%)\ %P'
-    endif
+    execute 'setlocal statusline=%<%f\ [' . g:vim_tanka_env . ']\ %*%h%m%r%=%-14.(%l,%c%V%)\ %P'
 endfunction
 
 function! VimTankaSetPath()
@@ -99,12 +143,6 @@ function! VimTankaSetPath()
             return
         endtry
         execute 'setlocal path=' . p
-    endif
-endfunction
-
-function! s:VimTankaResetPath()
-    if &filetype == 'jsonnet'
-        setlocal path=
     endif
 endfunction
 
@@ -124,12 +162,3 @@ function! s:VimTankaGetPath()
     return '.,' . join(reverse(split(jpath, ':')), ',')
 endfunction
 
-function! s:RestoreStatuslines()
-    let v = winsaveview()
-    for [key, value] in items(s:vim_tanka_windows_original_statusline)
-        execute key . 'wincmd w'
-        execute 'setlocal statusline=' . value
-    endfor
-    let s:vim_tanka_windows_original_statusline = {}
-    call winrestview(v)
-endfunction

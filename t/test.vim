@@ -47,5 +47,29 @@ function! s:TestFind()
     "   local bar = import 'bar.libsonnet';
     execute 'find bar.libsonnet'
     call testify#assert#equals(@%, 'example/prom-grafana/lib/example-lib/bar.libsonnet')
-    endfunction
+endfunction
 call testify#it('Check finding imports', function('s:TestFind'))
+
+function! s:TestTankaOff()
+    " Make sure two different buffers are open
+    execute 'find main.jsonnet'
+    call testify#assert#equals(@%, 'example/prom-grafana/environments/default/main.jsonnet')
+    execute 'find path-rank-1.libsonnet'
+    call testify#assert#equals(@%, 'example/prom-grafana/vendor/path-rank-1.libsonnet')
+    let bn = bufnr('')
+
+    execute 'TankaOff'
+    " Make sure we're still in the same buffer and file
+    call testify#assert#equals(bufnr(''), bn)
+    call testify#assert#equals(@%, 'example/prom-grafana/vendor/path-rank-1.libsonnet')
+    " Make sure 'path' and 'statusline' are cleared
+    call testify#assert#equals(&l:path, '')
+    call testify#assert#equals(&l:statusline, '')
+
+    " Make sure path and statusline are cleared for other buffer
+    execute 'edit example/prom-grafana/environments/default/main.jsonnet'
+    call testify#assert#equals(@%, 'example/prom-grafana/environments/default/main.jsonnet')
+    call testify#assert#equals(&l:path, '')
+    call testify#assert#equals(&l:statusline, '')
+endfunction
+call testify#it('Check TankaOff', function('s:TestTankaOff'))

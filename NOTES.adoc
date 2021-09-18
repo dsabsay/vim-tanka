@@ -1,0 +1,80 @@
+== Design
+
+=== Feature goals
+
+==== First version
+
+* [x] Show current _context_ of plugin (i.e. Tanka environment `baseDir`).
+This should be a statusline thing or something.
+* [x] Jump to file in import statement, using proper path searching rules.
+See https://tanka.dev/libraries/import-paths
+* [x] Test changing Tanka envs while vim-tanka is already enabled (with a different env)
+* [x] More testing with weird window states.
+Sometimes `:TankaSetEnv` leaves Vim in a weird state.
+I'm not sure `winrestview()` is actually working the way I think it should.
+* [ ] Write README.
+
+==== Later versions
+
+* [ ] Search for word under cursor in all imported files (for current _context_)
+* [ ] Show docs from k8s-libsonnet (the docs are in the Jsonnet, probably via docsonnet) for some ID under cursor.
+** Ideally, need symbol resolution with a full AST.
+** Alternatively, a cruder approach would probably work OK, based on how most libraries I've seen use these function. We could just look for the `local deployment = $.core.v1.apps.deployment` line in the current file and then assume that will all come from the `_gen` folders in k8s-libsonnet. Prety hacky and unnaccurate though.
+* [ ] Integration of tk/jsonnet errors into quickfix.
+Parse error messages, extract line numbers, populate quickfix list.
+* [ ] Properly use autoload
+* [ ] Auto-complete for function arguments (hover tooltip)
+* [ ] Auto-complete for object fields.
+Sorta needs an lenient parser like tree-sitter.
+Or a hacky option is periodically running `tk eval` and caching the results.
+When `tk eval` fails, just use the latest cached result for completion.
+Updating cache could happen on a timer or on e.g. `BufWrite`.
+* [ ] Document how to add the _context_ to an existing statusline setup (e.g. with arline, powerline, etc.)
+
+== Bugs
+
+* [FIXED] When calling `:TankaSetEnv`, the cursor doesn't always stay in the same window.
+** I had a faulty underestanding of `winsaveview()` and `winrestview()`:
+they only work on a single window, and doesn't even save which buffer was loaded.
+** The `bufdo` command is probably why the current buffer at the end isn't correct.
+** Instead of `winsaveview()` and `winresetview()` I think I just need this:
+*** Save current buffer number.
+*** Run `bufdo` command to set 'path'
+*** Restore original buffer
+*** Save current window number
+*** Run `windo` command to update 'statusline'
+*** Run `execute nr . 'wincmd w'` to restore focus to original window.
+* [FIXED] `:TankaSetEnv` and `:TankaOff` print a bunch of window names to the screen.
+Kind annoying.
+* [FIXED] `:TankaSetEnv` with terminal window open shows ugly error message.
+* [FIXED] `:TankaSetEnv` with a hidden terminal buffer shows ugly error and ends leaving it open.
+* [FIXED] After running `:TankaOff`, opening a previously open buffer still shows a tanka statusline.
+
+== Notes
+
+=== On local statuslines
+
+See the git tag `local-statusline` for a semi-working version of this that uses local statuslines
+instead of setting the global statusline option.
+
+Unfortunately, after running :TankaOff, any Jsonnet buffers that were non-visible at that time
+will still have the local statusline when they are next loaded.
+
+My solution was to ditch the idea of local statuslines entirely and modify the global one.
+This obviously isn't ideal, but it can be disabled if people don't like it.
+
+In order to use local statuslines properly,
+I would probably need an approach that relies more on autocommands.
+When turning on Tanka, iterate through all visible windows to set.
+When turning off Tanka, just iterate through all open windows to reset.
+Then, set the local statusline on BufEnter when Tanka is on,
+but reset it when Tanka is off.
+The downside of this is that my plugin now has an autocommand that needs to run on _every_ Jsonnet buffer load event, but maybe that's fine.
+
+=== Related
+
+* Checkout the syntastic integration in `vim-jsonnet`: https://github.com/google/vim-jsonnet/pull/1
+* Jsonnet AST explorer thing: https://github.com/fkling/astexplorer/pull/505
+* https://github.com/returntocorp/semgrep
+* https://web.archive.org/web/20210516102739/https://vimways.org/2018/death-by-a-thousand-files/
+* https://teukka.tech/vimcandothat.html

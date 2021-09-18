@@ -9,9 +9,10 @@ CONTENTS                                                        *tanka-contents*
     1. Introduction .............................. |tanka-introduction|
     2. Usage ..................................... |tanka-usage|
     3. Commands .................................. |tanka-commands|
-    4. Common Problems ........................... |tanka-common-problems|
-    5. How It Works .............................. |tanka-how-it-works|
-    6. Related ................................... |tanka-related|
+    4. Configuration ............................. |tanka-configuration|
+    5. Common Problems ........................... |tanka-common-problems|
+    6. How It Works .............................. |tanka-how-it-works|
+    7. Related ................................... |tanka-related|
 
 ================================================================================
 INTRODUCTION                                                *tanka-introduction*
@@ -61,9 +62,20 @@ COMMANDS                                                        *tanka-commands*
     environment will be set as the plugin's "active environment".
 
 :TankaOff                                                            *:TankaOff*
-    Turns off the plugin's features, restoring the local 'statusline' and
-    'path' settings of all Jsonnet buffers.
+    Turns off the plugin's features, restoring the global 'statusline' and
+    'path' settings of all Jsonnet buffers. The statusline feature of this
+    plugin can be disabled (see |tanka-configuration|).
     
+
+================================================================================
+CONFIGURATION                                              *tanka-configuration*
+
+By default, the global 'statusline' is modified to show the name of the
+currently active Tanka environment. If you don't want this, add the following
+to your .vimrc: >
+
+    let g:vim_tanka_statusline_enabled = v:false
+<
 ================================================================================
 COMMON PROBLEMS                                          *tanka-common-problems*
 

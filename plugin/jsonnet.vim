@@ -1,4 +1,5 @@
 let g:vim_tanka_enabled = 0
+let g:vim_tanka_statusline_enabled = v:true
 
 " These variables must be changed simultaneously
 let g:vim_tanka_env = ''
@@ -20,23 +21,12 @@ endfunction
 
 function! s:TankaOff()
     let g:vim_tanka_enabled = 0
+    let g:vim_tanka_env = ''
 
-    " Reset statuslines
-    for win in getwininfo()
-        if getbufvar(win.bufnr, '&filetype') == "jsonnet"
-            call setwinvar(win.winnr, '&statusline', '')
-        endif
-    endfor
-    let curBufNr = bufnr('')
-    for buf in getbufinfo()
-        if getbufvar(buf.bufnr, '&filetype') == "jsonnet"
-            " echom 'clearing statusline for buf: ' . buf.bufnr
-            execute 'buffer ' . buf.bufnr
-            execute 'setlocal statusline='
-            " call setbufvar(buf.bufnr, '&statusline', '')
-        endif
-    endfor
-    execute 'buffer ' . curBufNr
+    " Reset statusline
+    if g:vim_tanka_statusline_enabled == v:true
+        set statusline=
+    endif
 
     " Reset path value (will use global value)
     " path was changed to a buffer-local value. We don't restore
@@ -48,30 +38,14 @@ function! s:TankaOff()
             call setbufvar(buf.bufnr, '&path', '')
         endif
     endfor
-
-    " augroup vim_tanka_group
-    "     autocmd!
-    " augroup END
-endfunction
-
-function! s:ResetStatusline()
-    if &filetype == "jsonnet"
-        setlocal statusline=
-    endif
 endfunction
 
 function! s:TankaOn()
     let g:vim_tanka_enabled = 1
 
-    " Show statuslines on all Jsonnet windows
-    let curWinNr = winnr()
-    for win in getwininfo()
-        if getbufvar(win.bufnr, '&filetype') == "jsonnet"
-            execute win.winnr . 'wincmd w'
-            call VimTankaShowStatusline()
-        endif
-    endfor
-    execute curWinNr . 'wincmd w'
+    if g:vim_tanka_statusline_enabled == v:true
+        execute 'set statusline=%<%f\ [' . g:vim_tanka_env . ']\ %*%h%m%r%=%-14.(%l,%c%V%)\ %P'
+    endif
 
     " Try to get Jpath from tk
     try
@@ -87,11 +61,6 @@ function! s:TankaOn()
             call setbufvar(buf.bufnr, '&path', p)
         endif
     endfor
-    
-    " augroup vim_tanka_group
-    "     autocmd!
-    "     autocmd BufLeave *.jsonnet,*.libsonnet call s:ResetStatusline()
-    " augroup END
 endfunction
 
 function! s:SetTankaEnv()
@@ -128,10 +97,6 @@ function! s:SetTankaEnv()
     let g:vim_tanka_env_fullpath = fullpath
     call s:TankaOn()
     call s:PrintTankaEnv()
-endfunction
-
-function! VimTankaShowStatusline()
-    execute 'setlocal statusline=%<%f\ [' . g:vim_tanka_env . ']\ %*%h%m%r%=%-14.(%l,%c%V%)\ %P'
 endfunction
 
 function! VimTankaSetPath()

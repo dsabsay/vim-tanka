@@ -64,12 +64,54 @@ function! s:TestTankaOff()
     call testify#assert#equals(@%, 'example/prom-grafana/vendor/path-rank-1.libsonnet')
     " Make sure 'path' and 'statusline' are cleared
     call testify#assert#equals(&l:path, '')
-    call testify#assert#equals(&l:statusline, '')
+    call testify#assert#equals(&statusline, '')
 
     " Make sure path and statusline are cleared for other buffer
     execute 'edit example/prom-grafana/environments/default/main.jsonnet'
     call testify#assert#equals(@%, 'example/prom-grafana/environments/default/main.jsonnet')
     call testify#assert#equals(&l:path, '')
-    call testify#assert#equals(&l:statusline, '')
+    call testify#assert#equals(&statusline, '')
 endfunction
 call testify#it('Check TankaOff', function('s:TestTankaOff'))
+
+" NOTE: Depends on previous test having run :TankaOff
+function! s:TestDisableStatusline()
+    " Disable statusline feature
+    set statusline=foo
+    let g:vim_tanka_statusline_enabled = v:false
+
+    " Set Tanka env
+    execute 'edit example/prom-grafana/environments/default/main.jsonnet'
+    execute 'TankaSetEnv'
+    call testify#assert#equals(g:vim_tanka_enabled, 1)
+    call testify#assert#equals(g:vim_tanka_env, 'environments/default')
+    call testify#assert#equals(g:vim_tanka_env_fullpath, getcwd() . '/example/prom-grafana/environments/default/main.jsonnet')
+    call testify#assert#equals(&statusline, 'foo')
+
+    execute 'TankaOff'
+    call testify#assert#equals(&statusline, 'foo')
+endfunction
+call testify#it('Check disabling statusline', function('s:TestDisableStatusline'))
+
+function! s:TestSwitchEnv()
+    call testify#assert#equals(g:vim_tanka_enabled, 0)
+    call testify#assert#equals(g:vim_tanka_env, '')
+
+    " Set Tanka env
+    execute 'edit example/prom-grafana/environments/default/main.jsonnet'
+    execute 'TankaSetEnv'
+    call testify#assert#equals(g:vim_tanka_enabled, 1)
+    call testify#assert#equals(g:vim_tanka_env, 'environments/default')
+    call testify#assert#equals(g:vim_tanka_env_fullpath, getcwd() . '/example/prom-grafana/environments/default/main.jsonnet')
+
+    " Verify path is correct
+    execute 'find path-rank-4.libsonnet'
+    call testify#assert#equals(@%, 'example/prom-grafana/environments/default/path-rank-4.libsonnet')
+
+    " Change environment
+    execute 'edit example/prom-grafana/environments/secondary/main.jsonnet'
+    execute 'TankaSetEnv'
+    execute 'find wiz.libsonnet'
+    call testify#assert#equals(@%, 'example/prom-grafana/environments/secondary/vendor/wiz.libsonnet')
+endfunction
+call testify#it('Check switching environment', function('s:TestSwitchEnv'))

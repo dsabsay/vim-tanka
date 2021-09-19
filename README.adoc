@@ -8,6 +8,8 @@ Then run `:TankaSetEnv`.
 
 Now you can put your cursor on an import filename and type `gf` to jump to that file. You can also use `:find`/`:sfind`. Tanka's https://tanka.dev/libraries/import-paths[import path precedence rules] are honored.
 
+`'makeprg'` and `'errorformat'` are also set appropriately so that the normal compile/quickfix workflow works as expected with `:make` or whatever wrapper you use on top of it. I like `:Make` with https://github.com/tpope/vim-dispatch[vim-dispatch].
+
 Install in whatever way you like.
 With https://github.com/junegunn/vim-plug[vim-plug], for example:
 

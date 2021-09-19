@@ -42,3 +42,8 @@ local k = import 'github.com/grafana/jsonnet-libs/ksonnet-util/kausal.libsonnet'
       + service.mixin.spec.withType('NodePort'),
   },
 }
+
+{
+  // foo: bar bar,
+  foo: 'bar',
+}

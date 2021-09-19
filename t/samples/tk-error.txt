@@ -1,0 +1,5 @@
+Error: evaluating jsonnet: /Users/danielsabsay/git/vim-tanka/example/prom-grafana/environments/default/main.jsonnet:47:12-15 Expected a comma before next field
+
+  foo: bar bar,
+
+

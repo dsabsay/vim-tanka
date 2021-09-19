@@ -43,11 +43,21 @@ precedence rules and works in all Jsonnet buffers. You can also use |:find|: >
 
     :find 'prometheus-mixin/mixin-libsonnet'
 <
+The 'makeprg' and 'errorformat' options are also set in each Jsonnet buffer
+when a Tanka environment is active so you can use Vim's built-in
+compile/quickfix features: >
+
+    :make
+<
+The quickfix window will show the error reported by Tanka, if any. The cursor
+will jump to the file, line, and column of the error. You can run `:make` from
+any Jsonnet buffer; the active Tanka environment will always be used.
+
 To check which Tanka environment is currently active: >
 
     :TankaEnv
 <
-And finally, to disable the plugin's features: >
+Finally, to disable the plugin's features: >
 
     :TankaOff
 <
@@ -62,11 +72,10 @@ COMMANDS                                                        *tanka-commands*
     environment will be set as the plugin's "active environment".
 
 :TankaOff                                                            *:TankaOff*
-    Turns off the plugin's features, restoring the global 'statusline' and
-    'path' settings of all Jsonnet buffers. The statusline feature of this
-    plugin can be disabled (see |tanka-configuration|).
+    Turns off the plugin's features, restoring the global 'statusline' and the
+    local 'path', 'makeprg', and 'errorformat' of all Jsonnet buffers. The
+    statusline feature of this plugin can be disabled (see |tanka-configuration|).
     
-
 ================================================================================
 CONFIGURATION                                              *tanka-configuration*
 
@@ -80,7 +89,15 @@ to your .vimrc: >
 COMMON PROBLEMS                                          *tanka-common-problems*
 
 If |:TankaSetEnv| fails, check to see that you can run `tk tool jpath <env>`
-successfully.
+successfully. Also check that the Vim process can see the Tanka executable: >
+
+    :echo system('tk --version')
+
+If not, it's probably because the shell used by |system()| to launch the
+process does not have Tanka on its PATH. You can check what shell is being
+used with: >
+
+    :set shell?
 
 ================================================================================
 HOW IT WORKS                                                *tanka-how-it-works*

@@ -5,6 +5,23 @@ let g:vim_tanka_statusline_enabled = v:true
 let g:vim_tanka_env = ''
 let g:vim_tanka_env_fullpath = ''
 
+" This is the 'errorformat' used to parse Tanka's Jsonnet error messages:
+"
+"   Start a multi-line error message that extracts filename, line, column, and
+"   message. Note that there is typically only one error reported, so this
+"   errorformat is only designed for that.
+"
+"       %EError:\ %.%#:\ %f:%l:%c\-%*[0-9]\ %m,
+"
+"   The next pattern captures the following lines that typically show
+"   context of the error (i.e. the offending line). The 'C' matches a line
+"   continuation; the '+' includes it in the output.
+"
+"       %+C,
+"
+"   This took probably around 2 hours to figure out...
+let s:errorformat = '%EError:\ %.%#:\ %f:%l:%c\-%*[0-9]\ %m,%+C'
+
 command! -nargs=0 TankaOff call s:TankaOff()
 command! -nargs=0 TankaEnv call s:PrintTankaEnv()
 command! -nargs=0 TankaSetEnv call s:SetTankaEnv()
@@ -36,6 +53,8 @@ function! s:TankaOff()
     for buf in getbufinfo()
         if getbufvar(buf.bufnr, '&filetype') == "jsonnet"
             call setbufvar(buf.bufnr, '&path', '')
+            call setbufvar(buf.bufnr, '&makeprg', '')
+            call setbufvar(buf.bufnr, '&errorformat', '')
         endif
     endfor
 endfunction
@@ -59,6 +78,8 @@ function! s:TankaOn()
     for buf in getbufinfo()
         if getbufvar(buf.bufnr, '&filetype') == "jsonnet"
             call setbufvar(buf.bufnr, '&path', p)
+            call setbufvar(buf.bufnr, '&makeprg', 'tk eval ' . g:vim_tanka_env_fullpath)
+            call setbufvar(buf.bufnr, '&errorformat', s:errorformat)
         endif
     endfor
 endfunction
@@ -109,6 +130,11 @@ function! VimTankaSetPath()
         endtry
         execute 'setlocal path=' . p
     endif
+endfunction
+
+function! VimTankaSetCompiler()
+    let &l:makeprg = "tk eval " . g:vim_tanka_env_fullpath
+    let &l:errorformat = s:errorformat
 endfunction
 
 function! s:VimTankaGetPath()

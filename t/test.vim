@@ -50,6 +50,23 @@ function! s:TestFind()
 endfunction
 call testify#it('Check finding imports', function('s:TestFind'))
 
+" NOTE: assumes tanka environment is active
+function! s:TestTkEval()
+    execute 'edit example/prom-grafana/environments/default/main.jsonnet'
+    let &makeprg="cat t/samples/tk-error.txt"
+    execute 'silent make!'
+    " 4 lines because it includes blank lines and the printed offending line.
+    " Not 5 because for some reason the first blank line after the first
+    " non-blank line is not in the qf list.
+    call testify#assert#equals(len(getqflist()), 4)
+    let item = getqflist()[0]
+    call testify#assert#equals(item.lnum, 47)
+    call testify#assert#equals(item.col, 12)
+    call testify#assert#equals(bufname(item.bufnr), "example/prom-grafana/environments/default/main.jsonnet")
+    set makeprg&
+endfunction
+call testify#it('Test tk eval error output', function('s:TestTkEval'))
+
 function! s:TestTankaOff()
     " Make sure two different buffers are open
     execute 'find main.jsonnet'
@@ -62,15 +79,19 @@ function! s:TestTankaOff()
     " Make sure we're still in the same buffer and file
     call testify#assert#equals(bufnr(''), bn)
     call testify#assert#equals(@%, 'example/prom-grafana/vendor/path-rank-1.libsonnet')
-    " Make sure 'path' and 'statusline' are cleared
+    " Make sure local options are cleared
     call testify#assert#equals(&l:path, '')
     call testify#assert#equals(&statusline, '')
+    call testify#assert#equals(&l:makeprg, '')
+    call testify#assert#equals(&l:errorformat, '')
 
-    " Make sure path and statusline are cleared for other buffer
+    " Make sure options are cleared for other buffer
     execute 'edit example/prom-grafana/environments/default/main.jsonnet'
     call testify#assert#equals(@%, 'example/prom-grafana/environments/default/main.jsonnet')
     call testify#assert#equals(&l:path, '')
     call testify#assert#equals(&statusline, '')
+    call testify#assert#equals(&l:makeprg, '')
+    call testify#assert#equals(&l:errorformat, '')
 endfunction
 call testify#it('Check TankaOff', function('s:TestTankaOff'))
 

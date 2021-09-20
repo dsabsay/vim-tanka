@@ -1,7 +1,9 @@
-let g:vim_tanka_enabled = 0
+" These variables are open to users
 let g:vim_tanka_statusline_enabled = v:true
+let g:vim_tanka_compile_enabled = v:true
 
 " These variables must be changed simultaneously
+let g:vim_tanka_enabled = 0
 let g:vim_tanka_env = ''
 let g:vim_tanka_env_fullpath = ''
 
@@ -53,8 +55,10 @@ function! s:TankaOff()
     for buf in getbufinfo()
         if getbufvar(buf.bufnr, '&filetype') == "jsonnet"
             call setbufvar(buf.bufnr, '&path', '')
-            call setbufvar(buf.bufnr, '&makeprg', '')
-            call setbufvar(buf.bufnr, '&errorformat', '')
+            if g:vim_tanka_compile_enabled == v:true
+                call setbufvar(buf.bufnr, '&makeprg', '')
+                call setbufvar(buf.bufnr, '&errorformat', '')
+            endif
         endif
     endfor
 endfunction
@@ -78,8 +82,10 @@ function! s:TankaOn()
     for buf in getbufinfo()
         if getbufvar(buf.bufnr, '&filetype') == "jsonnet"
             call setbufvar(buf.bufnr, '&path', p)
-            call setbufvar(buf.bufnr, '&makeprg', 'tk eval ' . g:vim_tanka_env_fullpath)
-            call setbufvar(buf.bufnr, '&errorformat', s:errorformat)
+            if g:vim_tanka_compile_enabled == v:true
+                call setbufvar(buf.bufnr, '&makeprg', 'tk eval ' . g:vim_tanka_env_fullpath)
+                call setbufvar(buf.bufnr, '&errorformat', s:errorformat)
+            endif
         endif
     endfor
 endfunction

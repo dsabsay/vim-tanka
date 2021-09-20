@@ -73,8 +73,7 @@ COMMANDS                                                        *tanka-commands*
 
 :TankaOff                                                            *:TankaOff*
     Turns off the plugin's features, restoring the global 'statusline' and the
-    local 'path', 'makeprg', and 'errorformat' of all Jsonnet buffers. The
-    statusline feature of this plugin can be disabled (see |tanka-configuration|).
+    local 'path', 'makeprg', and 'errorformat' of all Jsonnet buffers.
     
 ================================================================================
 CONFIGURATION                                              *tanka-configuration*
@@ -84,6 +83,11 @@ currently active Tanka environment. If you don't want this, add the following
 to your .vimrc: >
 
     let g:vim_tanka_statusline_enabled = v:false
+<
+If you have existing 'makeprg' and 'erroformat' settings for Tanka/Jsonnet,
+you can put this in your .vimrc to prevent this plugin from modifying them: >
+
+    let g:vim_tanka_compile_enabled = v:false
 <
 ================================================================================
 COMMON PROBLEMS                                          *tanka-common-problems*

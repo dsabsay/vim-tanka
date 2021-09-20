@@ -84,7 +84,7 @@ to your .vimrc: >
 
     let g:vim_tanka_statusline_enabled = v:false
 <
-If you have existing 'makeprg' and 'erroformat' settings for Tanka/Jsonnet,
+If you have existing 'makeprg' and 'errorformat' settings for Tanka/Jsonnet,
 you can put this in your .vimrc to prevent this plugin from modifying them: >
 
     let g:vim_tanka_compile_enabled = v:false
